@@ -338,7 +338,33 @@ rather than interpolating straight in Euclidean space. That’s the essence of G
 
 ## Case Study - Protein Modeling with GFM
 
-Below we highlight representative works that leverage GFM for proteins.	For context, SE(3)-equivariant diffusion models remain a strong baseline in this area <d-cite key="yim2023se"></d-cite>.
+<!-- Below we highlight representative works that leverage GFM for proteins.	For context, SE(3)-equivariant diffusion models remain a strong baseline in this area <d-cite key="yim2023se"></d-cite>. -->
+
+### Why is GFM a Natural Fit for Proteins?
+
+Protein structure generation sits at the intersection of **stringent geometric constraints** and **high-dimensional variability**:
+
+1. **Hierarchical manifolds.**  
+   * **Backbone pose** lives in the special Euclidean group $$\mathrm{SE}(3)$$.  
+   * **Backbone torsion angles** live on $S^1$ circles.  
+   * **Side-chain rotamers** occupy a high-dimensional torus $$\mathbb{T}^n$$.  
+   GFM operates directly on these product manifolds, guaranteeing every intermediate and final sample obeys the physics **by construction**, rather than relying on post-hoc projection or rejection.
+
+2. **Geodesic realism.**  
+   Small, local changes in a protein’s conformation correspond to *geodesic* moves on these manifolds (e.g. screw motions in $$\mathrm{SE}(3)$$ or incremental bond rotations). GFM’s flows follow geodesics, so probability mass moves along physically plausible trajectories that mirror molecular dynamics.
+
+3. **Built-in symmetries.**  
+   Proteins have no preferred global frame—rotating or translating an entire molecule should not change likelihood. Because GFM learns *tangent* vector fields on the manifold, enforcing **SE(3)-equivariance** is straightforward, eliminating spurious frame-dependence.
+
+4. **Deterministic and differentiable trajectories.**  
+   Unlike diffusion models that require hundreds of noisy steps, a trained GFM ODE can often transform noise to structure in **tens of steps**. The deterministic path is differentiable end-to-end, enabling gradient-based design or refinement tasks.
+
+5. **Sample validity and efficiency.**  
+   Empirically, GFM yields near-100 % valid backbones and side-chains, while Euclidean flows or diffusion models need costly relaxation to fix bond-length or chirality violations. Matching velocities (not log-densities) also removes expensive divergence terms, giving **1–2× faster training** on large structure sets.
+
+---
+
+### Representative Works
 
 * **FoldFlow (ICLR 2024)** – deterministic / stochastic flows on $$\mathrm{SE}(3)$$ for protein backbones <d-cite key="bosese"></d-cite>. Stable, faster than diffusion; up to 300 residues.
 
