@@ -17,10 +17,10 @@ bibliography: 2025-04-28-geometric-flow-matching.bib
 
 toc:
   - name: Why Generative Models on Manifolds?
-  - name: Recap: Flow Matching in Euclidean Space
-  - name: Preliminaries: Manifolds
+  - name: Recap - Flow Matching in Euclidean Space
+  - name: Preliminaries - Manifolds
   - name: How Geometric Flow Matching Works
-  - name: Case Study: Protein Modeling with GFM
+  - name: Case Study - Protein Modeling with GFM
   - name: Conclusion
 
 ---
@@ -61,7 +61,7 @@ Protein modeling epitomizes this need. A protein backbone is essentially a serie
 
 ---
 
-## Recap: Flow Matching in Euclidean Space
+## Recap - Flow Matching in Euclidean Space
 
 Before diving into manifold techniques, let’s briefly review **Flow Matching (FM)** in the standard Euclidean setting. Flow Matching is a relatively new paradigm for training *continuous normalizing flows* (CNFs) – a class of generative models where you transform a simple distribution (like Gaussian noise) into the data distribution by integrating an ODE (ordinary differential equation). Traditionally, CNFs are trained by maximum likelihood, which involves computing Jacobian determinants or simulating differential equations, which can be expensive and unstable. Flow Matching takes a different route: **don’t simulate the entire flow during training – instead, directly match the velocity field**<d-cite key="lipman2022flow"></d-cite>.
 
@@ -125,7 +125,7 @@ Flow Matching has notable advantages. By avoiding back-propagation through ODE s
 
 ---
 
-## Preliminaries: Manifolds
+## Preliminaries - Manifolds
 
 Before tackling flow matching on manifolds, let’s ensure we understand some basics of manifold geometry.
 
@@ -336,7 +336,7 @@ rather than interpolating straight in Euclidean space. That’s the essence of G
 
 ---
 
-## Case Study: Protein Modeling with GFM
+## Case Study - Protein Modeling with GFM
 
 Below we highlight representative works that leverage GFM for proteins.	For context, SE(3)-equivariant diffusion models remain a strong baseline in this area <d-cite key="yim2023se"></d-cite>.
 
