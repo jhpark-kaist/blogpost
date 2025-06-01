@@ -407,6 +407,10 @@ These works show GFM’s improved validity, speed, and scalability over manifold
 
 ## Conclusion
 
-Geometric Flow Matching marries differential geometry with deep generative modeling. By respecting curvature instead of fighting it, GFM yields accurate, valid, and efficient models – already transforming protein design and poised to impact many other areas. The momentum of FoldFlow, FlowPacker, Proteína, and Pullback FM signals that geometry-aware AI is at the cutting edge, with much more ahead.
+Geometric Flow Matching (GFM) shows that weaving rigorous differential geometry into deep generative modeling unlocks a new level of fidelity, efficiency, and scientific utility when the data itself lives on curved spaces. For proteins, a GFM‑trained flow respects bond geometry, SE(3) symmetries, and torsional periodicities at every timestep, outputting structures that are ready for downstream design or simulation with almost no post‑processing.
+
+But proteins are only the beginning. Camera trajectories in robotics and AR/VR, global climate fields on Earth’s sphere, crystalline orientations in materials science, and articulated body poses in computer graphics all inhabit non‑Euclidean manifolds. Early adopters already report faster convergence, higher validity, and richer sample diversity than Euclidean flows or diffusion baselines.
+
+The success of FoldFlow, FlowPacker, Proteína, and Pullback FM crystallizes a simple lesson: geometry is not a decorative extra—it is the very substrate on which real‑world data lives. GFM offers a blueprint for embracing that curvature without sacrificing the scalability of modern deep learning. If history is any guide, the next wave of breakthroughs—from novel enzymes to autonomous drones—will be powered by models that are as geometrically faithful as the phenomena they seek to capture.
 
 ---
