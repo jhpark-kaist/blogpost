@@ -17,11 +17,10 @@ bibliography: 2025-04-28-geometric-flow-matching.bib
 
 toc:
   - name: Why Generative Models on Manifolds?
-  - name: Recap - Flow Matching in Euclidean Space
-  - name: Preliminaries - Manifolds
+  - name: Recap: Flow Matching in Euclidean Space
+  - name: Preliminaries: Manifolds
   - name: How Geometric Flow Matching Works
-  - name: Case Study - Protein Modeling with GFM
-  - name: Strengths, Practical Considerations, and Challenges
+  - name: Case Study: Protein Modeling with GFM
   - name: Conclusion
 
 ---
@@ -62,7 +61,7 @@ Protein modeling epitomizes this need. A protein backbone is essentially a serie
 
 ---
 
-## Recap - Flow Matching in Euclidean Space
+## Recap: Flow Matching in Euclidean Space
 
 Before diving into manifold techniques, let’s briefly review **Flow Matching (FM)** in the standard Euclidean setting. Flow Matching is a relatively new paradigm for training *continuous normalizing flows* (CNFs) – a class of generative models where you transform a simple distribution (like Gaussian noise) into the data distribution by integrating an ODE (ordinary differential equation). Traditionally, CNFs are trained by maximum likelihood, which involves computing Jacobian determinants or simulating differential equations, which can be expensive and unstable. Flow Matching takes a different route: **don’t simulate the entire flow during training – instead, directly match the velocity field**<d-cite key="lipman2022flow"></d-cite>.
 
@@ -126,7 +125,7 @@ Flow Matching has notable advantages. By avoiding back-propagation through ODE s
 
 ---
 
-## Preliminaries - Manifolds
+## Preliminaries: Manifolds
 
 Before tackling flow matching on manifolds, let’s ensure we understand some basics of manifold geometry.
 
@@ -183,7 +182,7 @@ This yields a curve that starts at $$p$$ ($$t=0$$) and ends at $$q$$ ($$t=1$$).
 
 Finally, if we do embed the manifold in a higher-dimensional Euclidean space (like a sphere in $$\mathbb{R}^3$$), we can talk about **projecting** vectors onto the tangent space. For example, if you have some ambient vector in $$\mathbb{R}^3$$ at point $$p$$ on the sphere, the tangent projection would subtract the component normal to the sphere, leaving a vector tangent to the sphere.
 
-With these notions in mind, we’re ready to see how flow matching can be adapted to manifold-valued data. Riemannian score-based diffusion models have already been explored; see De Bortoli *et al.* (2022) <d-cite key="debortoli2022riemannian"></d-cite>.
+With these notions in mind, we’re ready to see how flow matching can be adapted to manifold-valued data. Riemannian score-based diffusion models have already been explored; see De Bortoli *et al.* (2022) <d-cite key="de2022riemannian"></d-cite>.
 
 ---
 
@@ -283,7 +282,7 @@ $$
 
 This can be done via Lie group tools on $$\mathrm{SO}(3)$$ or $$\mathrm{SE}(3)$$ using axis-angle representation.
 
-Beyond using a fixed metric, a related extension—**Metric Flow Matching (MFM)**—first *learns* a data-driven Riemannian metric and then applies FM inside that learned geometry <d-cite key="metricfm2024"></d-cite>.
+Beyond using a fixed metric, a related extension—**Metric Flow Matching (MFM)**—first *learns* a data-driven Riemannian metric and then applies FM inside that learned geometry <d-cite key="kapusniak2024metric"></d-cite>.
 
 ---
 
@@ -297,7 +296,7 @@ G(x) \sim p_1 \quad \Leftrightarrow \quad x \sim p_1,\quad \text{for all } G \in
 \end{align*}
 $$
 
-This is called **equivariance**, and GFM can preserve it naturally by choosing symmetric $$p_0$$ and $$p_1$$. For example, FoldFlow <d-cite key="bose2023se"></d-cite> uses:
+This is called **equivariance**, and GFM can preserve it naturally by choosing symmetric $$p_0$$ and $$p_1$$. For example, FoldFlow <d-cite key="bosese"></d-cite> uses:
 - $$p_0$$: SE(3)-invariant prior (random rigid motions of a base scaffold)
 - $$p_1$$: data distribution of protein backbones (also SE(3)-invariant)
 
@@ -337,11 +336,11 @@ rather than interpolating straight in Euclidean space. That’s the essence of G
 
 ---
 
-## Case Study - Protein Modeling with GFM
+## Case Study: Protein Modeling with GFM
 
-Below we highlight representative works that leverage GFM for proteins.	For context, SE(3)-equivariant diffusion models remain a strong baseline in this area <d-cite key="se3diffusion2023"></d-cite>.
+Below we highlight representative works that leverage GFM for proteins.	For context, SE(3)-equivariant diffusion models remain a strong baseline in this area <d-cite key="yim2023se"></d-cite>.
 
-* **FoldFlow (ICLR 2024)** – deterministic / stochastic flows on $$\mathrm{SE}(3)$$ for protein backbones [10, 11, 12]. Stable, faster than diffusion; up to 300 residues.
+* **FoldFlow (ICLR 2024)** – deterministic / stochastic flows on $$\mathrm{SE}(3)$$ for protein backbones <d-cite key="bosese"></d-cite>. Stable, faster than diffusion; up to 300 residues.
 
 $$
 \begin{align*}
@@ -350,7 +349,7 @@ $$
 \end{align*}
 $$
 
-* **FlowPacker (NeurIPS MLSB 2024)** – torsional flow matching for side-chain packing on a high-dimensional torus; respects $$360^\circ/180^\circ$$ symmetries; beats diffusion baselines [13, 14].
+* **FlowPacker (Bioinformatics 2025)** – torsional flow matching for side-chain packing on a high-dimensional torus; respects $$360^\circ/180^\circ$$ symmetries; beats diffusion baselines <d-cite key="lee2025flowpacker"></d-cite>.
 
 $$
 \begin{align*}
@@ -359,7 +358,7 @@ $$
 \end{align*}
 $$
 
-* **Proteína (ICLR 2025)** – massive flow model (21M structures) generating up to 800-residue proteins with hierarchical conditioning [15, 16, 17, 18].
+* **Proteína (ICLR 2025)** – massive flow model (21M structures) generating up to 800-residue proteins with hierarchical conditioning <d-cite key="geffnerproteina"></d-cite>.
 
 $$
 \begin{align*}
@@ -367,7 +366,7 @@ $$
 \end{align*}
 $$
 
-* **Pullback Flow Matching (NeurIPS 2024)** – learns an isometric latent manifold first, then runs FM [19, 20, 27].
+* **Pullback Flow Matching (NeurIPS 2024)** – learns an isometric latent manifold first, then runs FM <d-cite key="de2024pullback"></d-cite>.
 
 $$
 \begin{align*}
