@@ -42,7 +42,7 @@ One might think we can bypass the issue by representing manifold data in some Eu
 
 Protein modeling epitomizes this need. A protein backbone is essentially a series of bond angles and lengths – many of which (bond lengths, planar angles) are fixed, leaving torsion angles that rotate freely but periodically. Traditional generative models that ignore these periodicities might output physically implausible structures or require ad-hoc fixes (like wrapping angles or rejecting invalid outputs). By developing generative models on manifolds, researchers aim to produce proteins natively in valid conformation spaces (like torsion-angle space or $$\mathrm{SE}(3)$$ space) without falling off the manifold. The same principle applies to other domains (robotics with rotation trajectories, climate data on Earth’s sphere, etc.), but we’ll keep our focus on proteins as a running example. -->
 
-## 1. Why Generative Models on Manifolds?
+## Why Generative Models on Manifolds?
 
 Real-world data often have inherent geometric constraints that make their natural domain a manifold instead of a full Euclidean space. **Proteins** provide an excellent example: a protein’s 3-D conformation can be described by torsion angles (like phi/psi backbone angles or side-chain rotations), which are periodic variables on a circle ($$S^1$$). Similarly, the overall orientation and position of a protein in space lie in the $$\mathrm{SE}(3)$$ group of 3-D rotations and translations – another manifold. If we naively treat such data as unconstrained vectors in $$\,\mathbb{R}^n\,$$, we risk modeling artifacts:
 
@@ -92,7 +92,7 @@ Flow Matching has notable advantages. By avoiding back-propagation through ODE s
 
 **Limitations:** Flow Matching as described assumes we can freely sample and compute differences in the ambient space $$\mathbb{R}^n$$. If our data lies on a manifold, applying Euclidean FM directly can be problematic. For instance, if $$x_t$$ and $$x_1$$ are points on a sphere or in $$\mathrm{SO}(3)$$, subtracting them or mixing them linearly is not geometrically meaningful (you can’t just average two rotations by component-wise linear interpolation without leaving $$\mathrm{SO}(3)$$). We need to reformulate the idea of a “conditional path” and “velocity field” in a way that lives on the manifold. **This is where Geometric Flow Matching enters the scene.** -->
 
-## 2. Recap: Flow Matching in Euclidean Space
+## Recap - Flow Matching in Euclidean Space
 
 Before diving into manifold techniques, let’s briefly review **Flow Matching (FM)** in the standard Euclidean setting. Flow Matching is a relatively new paradigm for training *continuous normalizing flows* (CNFs) – a class of generative models where you transform a simple distribution (like Gaussian noise) into the data distribution by integrating an ODE (ordinary differential equation). Traditionally, CNFs are trained by maximum likelihood, which involves computing Jacobian determinants or simulating differential equations, which can be expensive and unstable. Flow Matching takes a different route: **don’t simulate the entire flow during training – instead, directly match the velocity field**<d-cite key="lipman2022flow"></d-cite>.
 
@@ -183,7 +183,7 @@ Finally, if we do embed the manifold in a higher-dimensional Euclidean space (li
 
 With these notions in mind, we’re ready to see how flow matching can be adapted to manifold-valued data. -->
 
-## 3. Preliminaries: Manifolds
+## Preliminaries - Manifolds
 
 Before tackling flow matching on manifolds, let’s ensure we understand some basics of manifold geometry.
 
@@ -269,14 +269,14 @@ Integrating the learned ODE $$\dot{x}=v_\theta(t,x)$$ from $$t=0$$ to $$1$$ then
 A circle-example intuition: Points are “blown” along arcs toward high-density regions, never leaving the circle, unlike straight-line interpolation through its interior.
  -->
 
-## 4. How Geometric Flow Matching Works
+## How Geometric Flow Matching Works
 
 **Geometric Flow Matching (GFM)** extends the flow-matching idea to Riemannian manifolds (manifolds equipped with a notion of distance/metric). The core challenge is: **how do we define and train a flow entirely on a manifold?** We need a time-dependent vector field $$v(t,x)\in T_xM$$ and we need to match it to an “ideal” field that transports probability along a chosen path $$p_t$$ on $$M$$.
 
 The recipe:
 
 1. **Choose a path $$p_t$$ on the manifold.**  
-   We still start with a simple distribution $$p_0$$ on $$M$$ and the data distribution $$p_1$$. One convenient choice (Chen & Lipman 2023) is a *geodesic interpolation* between a data sample $$x_1\sim p_1$$ and a random sample $$x_0\sim p_0$$:
+   We still start with a simple distribution $$p_0$$ on $$M$$ and the data distribution $$p_1$$. One convenient choice is a *geodesic interpolation* between a data sample $$x_1\sim p_1$$ and a random sample $$x_0\sim p_0$$:
 
    $$
    \begin{align*}
@@ -284,7 +284,7 @@ The recipe:
    \end{align*}
    $$
 
-   At $$t=0$$, $$\psi_0 = x_0$$; at $$t=1$$, $$\psi_1 = x_1$$.
+   At $$t=0$$, $$\psi_0 = x_0$$; at $$t=1$$, $$\psi_1 = x_1$$ <d-cite key="chen2023flow"></d-cite>.
 
 2. **Define the target velocity field.**  
    Differentiate the interpolation:
@@ -316,11 +316,119 @@ $$
 
 from $$t=0$$ to $$1$$ then carries $$p_0$$ to $$p_1$$, and **the state $$x(t)$$ stays on $$M$$ by construction**.
 
-A circle-example intuition: Points are “blown” along arcs toward high-density regions, never leaving the circle, unlike straight-line interpolation through its interior.
+---
+
+### Additional Intuition and Insights
+
+Under the hood, several things ensure this is mathematically consistent:
+
+$$
+\begin{align*}
+\dot{x}(t) = v(t, x(t)),\quad &x(t) \in M,\quad v(t,x) \in T_x M \\
+\Rightarrow\ & \text{flow remains on } M,\ \text{ideally matching } p_t \text{ if } v = u
+\end{align*}
+$$
+
+Chen & Lipman’s RFM work <d-cite key="chen2023flow"></d-cite> showed that GFM avoids:
+- simulating stochastic processes on $$M$$,
+- computing divergence of $$v$$ on the manifold,
+- and enables closed-form $$u(t,x)$$ in many geometries.
+
+For manifolds where geodesics aren’t explicit, spectral methods can approximate $$\exp$$ and $$\log$$ as needed.
+
+Let’s build some intuition with a simple manifold: the **circle** ($$S^1$$).
+
+- Suppose $$p_0$$ is uniform noise on the circle, and $$p_1$$ concentrates around a few angles.
+- If $$x_0 \sim p_0$$ and $$x_1 \sim p_1$$, the geodesic between them is a short arc.
+- The geodesic interpolation:
+
+  $$
+  \begin{align*}
+  \psi_t(x_0 \mid x_1) = \exp_{x_0}\left( t \cdot \log_{x_0}(x_1) \right)
+  \end{align*}
+  $$
+
+  describes a smooth movement along that arc.
+- Then the vector field $$u(t,x)$$ points along the circle toward data-rich regions — a kind of breeze pushing probability mass toward $$p_1$$.
+- Crucially, **all motion stays on the manifold**, unlike linear paths in $$\mathbb{R}^2$$.
+
+For general manifolds, the learned vector field is also tangent:
+
+$$
+\begin{align*}
+\dot{x}(t) = v_\theta(t, x(t)) \in T_{x(t)}M
+\end{align*}
+$$
+
+The exp map acts internally in integration: you take a small step in the tangent space, then reproject:
+
+$$
+\begin{align*}
+x_{t+\epsilon} = \exp_{x_t}(\epsilon \cdot v_\theta(t,x_t))
+\end{align*}
+$$
+
+This can be done via Lie group tools on $$\mathrm{SO}(3)$$ or $$\mathrm{SE}(3)$$ using axis-angle representation.
 
 ---
 
-## 5. Case Study: Protein Modeling with GFM
+### Symmetry and Equivariance
+
+On many manifolds (like $$\mathrm{SE}(3)$$), **invariance** matters.
+
+If you rotate a protein and then generate, it should be the same as generating and then rotating.
+
+$$
+\begin{align*}
+G(x) \sim p_1 \quad \Leftrightarrow \quad x \sim p_1,\quad \text{for all } G \in \mathrm{SE}(3)
+\end{align*}
+$$
+
+This is called **equivariance**, and GFM can preserve it naturally by choosing symmetric $$p_0$$ and $$p_1$$.
+
+For example, FoldFlow <d-cite key="bose2023se"></d-cite> uses:
+- $$p_0$$: SE(3)-invariant prior (random rigid motions of a base scaffold)
+- $$p_1$$: data distribution of protein backbones (also SE(3)-invariant)
+
+Then, GFM learns relative transformations without fixing any global frame:
+
+$$
+\begin{align*}
+\text{Learned flow:} \quad p_0^{\text{inv}} \longrightarrow p_1^{\text{inv}} \text{ via SE(3)-equivariant vector field}
+\end{align*}
+$$
+
+This avoids accidental alignment artifacts.
+
+---
+
+### Summary
+
+Geometric Flow Matching adapts FM using exp/log and geodesics to define a time-dependent velocity field on $$M$$. The network learns to project samples toward $$p_1$$ by "blowing" them along the manifold.
+
+$$
+\begin{align*}
+\psi_t(x_0 \mid x_1) &= \exp_{x_0}(t\,\log_{x_0}(x_1)) \\
+v_\theta(t,x) &\approx \partial_t \psi_t(x_0 \mid x_1) \\
+\mathcal{L} &= \mathbb{E}_{t, x_0, x_1}\left\| v_\theta(t, \psi_t) - \partial_t \psi_t \right\|^2
+\end{align*}
+$$
+
+Even with these formulas, the core message is:
+
+$$
+\begin{align*}
+\text{Move points along geodesics toward high-density regions on } M
+\end{align*}
+$$
+
+rather than interpolating straight in Euclidean space. That’s the essence of GFM.
+
+<!-- A circle-example intuition: Points are “blown” along arcs toward high-density regions, never leaving the circle, unlike straight-line interpolation through its interior. -->
+
+---
+
+## Case Study - Protein Modeling with GFM
 
 * **FoldFlow (ICLR 2024)** – deterministic / stochastic flows on $$\mathrm{SE}(3)$$ for protein backbones [10, 11, 12]. Stable, faster than diffusion; up to 300 residues.
 
@@ -361,7 +469,7 @@ These works show GFM’s improved validity, speed, and scalability over manifold
 
 ---
 
-## 6. Strengths, Practical Considerations, and Challenges
+## Strengths, Practical Considerations, and Challenges
 
 ### Strengths of GFM  
 
